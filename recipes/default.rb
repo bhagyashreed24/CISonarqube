@@ -50,6 +50,12 @@ package "sonar" do
  action :install
 end
 
+template "/tmp/sqlcmds.sql" do
+  source "sqlcmds.sql"
+  mode "0755"
+  owner "sonar"
+end
+
 # Defined SonarQube Service
 
 service 'sonar' do
@@ -63,3 +69,21 @@ template "/opt/sonar/conf/sonar.properties" do
   owner "sonar"
   notifies :restart, 'service[sonar]', :immediately
 end
+
+execute "Run commands to set the database" do
+  command "sudo /usr/bin/mysql -u root --password=password  mysql   < /tmp/sqlcmds.sql > /tmp/op"
+  action :run
+end
+
+=begin
+sudo /usr/bin/mysql -u root --password=password  mysql   < sqlcmd.sql 
+ERROR 1007 (HY000) at line 1: Can't create database 'sonar'; database exists
+
+ubuntu@ip-172-31-37-2:/tmp$ cat sqlcmd.sql 
+CREATE DATABASE sonar CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE USER 'sonar' IDENTIFIED BY 'sonar';
+GRANT ALL ON sonar.* TO 'sonar'@'%' IDENTIFIED BY 'sonar';
+GRANT ALL ON sonar.* TO 'sonar'@'localhost' IDENTIFIED BY 'sonar';
+FLUSH PRIVILEGES;
+
+=end
