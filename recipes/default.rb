@@ -56,6 +56,11 @@ template "/tmp/sqlcmds.sql" do
   owner "sonar"
 end
 
+execute "Run commands to set the database" do
+  command "sudo /usr/bin/mysql -u root --password=password  mysql   < /tmp/sqlcmds.sql > /tmp/op"
+  action :run
+end
+
 # Defined SonarQube Service
 
 service 'sonar' do
@@ -70,10 +75,6 @@ template "/opt/sonar/conf/sonar.properties" do
   notifies :restart, 'service[sonar]', :immediately
 end
 
-execute "Run commands to set the database" do
-  command "sudo /usr/bin/mysql -u root --password=password  mysql   < /tmp/sqlcmds.sql > /tmp/op"
-  action :run
-end
 
 =begin
 sudo /usr/bin/mysql -u root --password=password  mysql   < sqlcmd.sql 
